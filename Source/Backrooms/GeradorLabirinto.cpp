@@ -3,6 +3,10 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerStart.h"
 #include "EngineUtils.h"
+#include "Engine/StaticMeshActor.h"
+#include "Engine/StaticMesh.h"
+#include "Components/StaticMeshComponent.h"
+#include "UObject/ConstructorHelpers.h"
 
 namespace
 {
@@ -23,6 +27,13 @@ AGeradorLabirinto::AGeradorLabirinto()
 {
     PrimaryActorTick.bCanEverTick = false;
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Raiz"));
+
+    // Pilar padrão: o cubo da engine (dá para trocar no painel Details)
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> Cubo(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (Cubo.Succeeded())
+    {
+        MalhaPilar = Cubo.Object;
+    }
 }
 
 void AGeradorLabirinto::Limpar()
@@ -35,6 +46,15 @@ void AGeradorLabirinto::Limpar()
         }
     }
     Celulas.Empty();
+
+    for (AActor* Pilar : Pilares)
+    {
+        if (IsValid(Pilar))
+        {
+            Pilar->Destroy();
+        }
+    }
+    Pilares.Empty();
 }
 
 void AGeradorLabirinto::NovaSemente()
@@ -124,6 +144,25 @@ void AGeradorLabirinto::Gerar()
         }
     }
 
+    // ---------- 2b) Salões abertos ----------
+    for (int32 S = 0; S < NumeroDeSaloes; ++S)
+    {
+        const int32 Largura = FMath::Min(Aleatorio.RandRange(TamanhoSalaoMin, TamanhoSalaoMax), Colunas);
+        const int32 Altura = FMath::Min(Aleatorio.RandRange(TamanhoSalaoMin, TamanhoSalaoMax), Linhas);
+        const int32 X0 = Aleatorio.RandRange(0, Colunas - Largura);
+        const int32 Y0 = Aleatorio.RandRange(0, Linhas - Altura);
+
+        // Remove todas as paredes internas do retângulo
+        for (int32 Y = Y0; Y < Y0 + Altura; ++Y)
+        {
+            for (int32 X = X0; X < X0 + Largura; ++X)
+            {
+                if (X + 1 < X0 + Largura) Abrir(X, Y, 1, 0);
+                if (Y + 1 < Y0 + Altura)  Abrir(X, Y, 0, 1);
+            }
+        }
+    }
+
     // ---------- 3) Cria as células no mundo ----------
     const FVector Origem = GetActorLocation();
 
@@ -151,6 +190,46 @@ void AGeradorLabirinto::Gerar()
             Celula->SetFolderPath(TEXT("Labirinto"));   // organiza no Organizador
 #endif
             Celulas.Add(Celula);
+        }
+    }
+
+    // ---------- 3b) Pilares nos cantos abertos ----------
+// Um canto fica entre 4 células. Se nenhuma parede encosta nele, pode ter um pilar.
+    if (MalhaPilar)
+    {
+        for (int32 Y = 1; Y < Linhas; ++Y)
+        {
+            for (int32 X = 1; X < Colunas; ++X)
+            {
+                const FDadosCelula& SudOeste = Grade[Indice(X - 1, Y - 1)];
+                const FDadosCelula& NorOeste = Grade[Indice(X, Y - 1)];
+                const FDadosCelula& SulLeste = Grade[Indice(X - 1, Y)];
+
+                const bool bCantoAberto = !SudOeste.Norte && !SulLeste.Norte
+                    && !SudOeste.Leste && !NorOeste.Leste;
+
+                if (!bCantoAberto || Aleatorio.FRand() >= ChancePilar) continue;
+
+                const FVector Local = Origem + FVector((X - 0.5f) * TamanhoCelula,
+                    (Y - 0.5f) * TamanhoCelula,
+                    150.f);   // metade da altura (3 m)
+
+                AStaticMeshActor* Pilar = Mundo->SpawnActor<AStaticMeshActor>(Local, FRotator::ZeroRotator);
+                if (!Pilar) continue;
+
+                UStaticMeshComponent* Malha = Pilar->GetStaticMeshComponent();
+                Malha->SetStaticMesh(MalhaPilar);
+                Malha->SetWorldScale3D(FVector(0.6f, 0.6f, 3.f));   // 60 x 60 cm, 3 m de altura
+                if (MaterialPilar)
+                {
+                    Malha->SetMaterial(0, MaterialPilar);
+                }
+#if WITH_EDITOR
+                Pilar->SetFolderPath(TEXT("Labirinto/Pilares"));
+                Pilar->SetActorLabel(FString::Printf(TEXT("Pilar_%d_%d"), X, Y));
+#endif
+                Pilares.Add(Pilar);
+            }
         }
     }
 

@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GeradorLabirinto.generated.h"
+class UStaticMesh;
+class UMaterialInterface;
 
 class ACelula;
 
@@ -39,6 +41,29 @@ public:
     UPROPERTY(EditAnywhere, Category = "Gerador", meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float ChanceLampada = 0.7f;
 
+    // ---------- Salões abertos ----------
+// Quantos salões abrir no labirinto
+    UPROPERTY(EditAnywhere, Category = "Gerador|Saloes", meta = (ClampMin = "0"))
+    int32 NumeroDeSaloes = 3;
+
+    // Tamanho dos salões, em células (mínimo e máximo)
+    UPROPERTY(EditAnywhere, Category = "Gerador|Saloes", meta = (ClampMin = "2"))
+    int32 TamanhoSalaoMin = 2;
+
+    UPROPERTY(EditAnywhere, Category = "Gerador|Saloes", meta = (ClampMin = "2"))
+    int32 TamanhoSalaoMax = 4;
+
+    // ---------- Pilares ----------
+    // Chance de surgir um pilar em cada canto aberto
+    UPROPERTY(EditAnywhere, Category = "Gerador|Pilares", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+    float ChancePilar = 0.5f;
+
+    UPROPERTY(EditAnywhere, Category = "Gerador|Pilares")
+    TObjectPtr<UStaticMesh> MalhaPilar;
+
+    UPROPERTY(EditAnywhere, Category = "Gerador|Pilares")
+    TObjectPtr<UMaterialInterface> MaterialPilar;
+
     // ---------- Botões que aparecem no painel Detalhes ----------
     UFUNCTION(CallInEditor, Category = "Gerador")
     void Gerar();
@@ -53,4 +78,7 @@ private:
     // Guarda as células criadas, para poder apagar depois
     UPROPERTY()
     TArray<TObjectPtr<ACelula>> Celulas;
+
+    UPROPERTY()
+    TArray<TObjectPtr<AActor>> Pilares;
 };
