@@ -1,0 +1,19 @@
+# Pastas geradas automaticamente pela Unreal (recriadas sozinhas)
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio
+.vs/
+*.sln
+*.slnx
+*.VC.db
+*.suo
+*.sdf
+*.opensdf
+*.opendb
+
+# Plugins
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
