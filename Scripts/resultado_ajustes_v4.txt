@@ -1,0 +1,6 @@
+passos importados: 6 (duracoes 0.38, 0.38, 0.38, 0.38, 0.38, 0.38)
+personagem: 6 passos, volume 0.42
+sustos: 6 passos, volume 1.1
+teto: placas de 60 cm
+lampada apagada: difusor claro
+PRONTO

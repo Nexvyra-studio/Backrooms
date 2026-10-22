@@ -1,0 +1,6 @@
+prioridades de som ajustadas
+pos-processo: exposicao 0, saturacao 0.92, vinheta 0.34, Lumen mais rapido
+luz do sol desligada (DirectionalLight)
+DiretorSustos: modo teste DESLIGADO
+EnigmaLevel0: modo teste DESLIGADO
+PRONTO

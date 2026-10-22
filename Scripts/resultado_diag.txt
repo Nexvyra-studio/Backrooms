@@ -1,0 +1,38 @@
+ator DirectionalLight em <Struct 'Vector' (0x00000225885BAA40) {x: 0.000000, y: 0.000000, z: 400.000000}>
+ator SkyAtmosphere em <Struct 'Vector' (0x00000225885BBF80) {x: 0.000000, y: 0.000000, z: -6000.000000}>
+ator SkyLight em <Struct 'Vector' (0x00000225885BBF80) {x: 0.000000, y: 0.000000, z: 600.000000}>
+ator ExponentialHeightFog em <Struct 'Vector' (0x00000225885BAA40) {x: -5600.000000, y: -50.000000, z: -6850.000000}>
+ator PlayerStart em <Struct 'Vector' (0x00000225885BBF80) {x: 0.000000, y: 0.000000, z: 100.000000}>
+PP auto_exposure_method = <AutoExposureMethod.AEM_HISTOGRAM: 0> (override=False)
+PP auto_exposure_bias = -0.5 (override=True)
+PP auto_exposure_min_brightness = 1.0 (override=True)
+PP auto_exposure_max_brightness = 1.0 (override=True)
+PP auto_exposure_apply_physical_camera_exposure = True (override=False)
+PP auto_exposure_speed_up = 3.0 (override=False)
+PP auto_exposure_speed_down = 1.0 (override=False)
+PP lumen_scene_lighting_update_speed = 1.0 (override=False)
+PP lumen_final_gather_lighting_update_speed = 1.0 (override=False)
+PP lumen_final_gather_quality = 1.0 (override=False)
+PP dynamic_global_illumination_method = <DynamicGlobalIlluminationMethod.LUMEN: 1> (override=False)
+PP reflection_method = <ReflectionMethod.LUMEN: 1> (override=False)
+PP white_temp = 6500.0 (override=False)
+PP color_saturation = <Struct 'Vector4' (0x00000225AD284B10) {x: 0.800000, y: 0.800000, z: 0.800000, w: 1.000000}> (override=True)
+PP color_gamma = <Struct 'Vector4' (0x00000225AD284B50) {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}> (override=False)
+PP ambient_occlusion_intensity = 0.5 (override=False)
+PP vignette_intensity = 0.41999998688697815 (override=True)
+PP film_grain_intensity = 0.2199999988079071 (override=True)
+PP bloom_intensity = 0.550000011920929 (override=True)
+PP indirect_lighting_intensity = 1.0 (override=False)
+DiretorSustos modo_teste = True
+EnigmaLevel0 modo_teste = False
+som Zumbido_Lampada: prioridade 1.00, duracao 37.92, classe None
+som Susto_Sombra: prioridade 1.00, duracao 1.45, classe None
+som Batidas_Parede: prioridade 1.00, duracao 2.70, classe None
+som Ambiente_Sala: prioridade 1.00, duracao 40.00, classe None
+som Intro_Queda: prioridade 1.00, duracao 5.70, classe None
+som Vento_Fresta: prioridade 1.00, duracao 10.50, classe None
+AudioMaxChannels ? module 'unreal' has no attribute 'WindowsTargetSettings'
+/Game/Sounds: Ambiente_Sala, ATT_Lampada, Batidas_Parede, Estalo_Lampada_1, Estalo_Lampada_2, Intro_Queda, Passo_Carpete_01, Passo_Carpete_02, Passo_Carpete_03, Susto_Sombra, Vento_Fresta, Zumbido_Lampada
+/Game/Materials: M_Luminaria, M_LuminariaApagada, M_MestreMundo, M_Papel, M_SaidaVerde, M_Sombra, MI_Carpete, MI_Parede, MI_Teto
+/Game/Maps: Lvl_Backrooms, Lvl_Level0, Lvl_Level1
+/Game/Meshes: Black, Light-Cover, Light-Glass, Light-Plastic, Light, Light1, Material, Metal

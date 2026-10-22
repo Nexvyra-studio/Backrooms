@@ -1,0 +1,9 @@
+/Game/Sounds/Passo_Carpete_01 -> Passo_Carpete_01.wav : True
+   origem: C:/Backrooms/Sons/Passo_Carpete_01.wav
+/Game/Sounds/Passo_Carpete_02 -> Passo_Carpete_02.wav : True
+   origem: C:/Backrooms/Sons/Passo_Carpete_02.wav
+/Game/Sounds/Passo_Carpete_03 -> Passo_Carpete_03.wav : True
+   origem: C:/Backrooms/Sons/Passo_Carpete_03.wav
+/Game/Textures/OfficeCeiling001_2K-JPG_Color -> teto.tga : True
+   origem: C:/Backrooms/Texturas/OfficeCeiling001_2K-JPG/OfficeCeiling001_2K-JPG_Color.jpg
+M_MestreMundo expressoes: 8

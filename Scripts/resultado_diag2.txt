@@ -1,0 +1,38 @@
+/Game/Materials/MI_Teto (pai /Game/Materials/M_MestreMundo.M_MestreMundo)
+  escalar Rugosidade = 0.699999988079071
+  escalar TamanhoTextura = 300.0
+  vetor Tinta = <Struct 'LinearColor' (0x000001F8B21CF0E0) {r: 0.720000, g: 0.680000, b: 0.560000, a: 1.000000}>
+  textura TexturaNormal = /Game/Textures/OfficeCeiling001_2K-JPG_NormalDX.OfficeCeiling001_2K-JPG_NormalDX
+  textura TexturaCor = /Game/Textures/OfficeCeiling001_2K-JPG_Color.OfficeCeiling001_2K-JPG_Color
+/Game/Materials/MI_Parede (pai /Game/Materials/M_MestreMundo.M_MestreMundo)
+  escalar Rugosidade = 0.800000011920929
+  escalar TamanhoTextura = 100.0
+  vetor Tinta = <Struct 'LinearColor' (0x000001F8B21CF0E0) {r: 0.850000, g: 0.750000, b: 0.450000, a: 1.000000}>
+  textura TexturaNormal = /Game/Textures/Wallpaper001A_2K-JPG_NormalDX.Wallpaper001A_2K-JPG_NormalDX
+  textura TexturaCor = /Game/Textures/Wallpaper001A_2K-JPG_Color.Wallpaper001A_2K-JPG_Color
+/Game/Materials/MI_Carpete (pai /Game/Materials/M_MestreMundo.M_MestreMundo)
+  escalar Rugosidade = 0.949999988079071
+  escalar TamanhoTextura = 50.0
+  vetor Tinta = <Struct 'LinearColor' (0x000001F8B21CF0E0) {r: 1.000000, g: 1.000000, b: 1.000000, a: 1.000000}>
+  textura TexturaNormal = /Game/Textures/Carpet011_2K-JPG_NormalDX.Carpet011_2K-JPG_NormalDX
+  textura TexturaCor = /Game/Textures/Carpet011_2K-JPG_Color.Carpet011_2K-JPG_Color
+componente Default__BP_FirstPersonCharacter_C (BP_FirstPersonCharacter_C)
+componente FirstPersonMesh_GEN_VARIABLE (SkeletalMeshComponent)
+componente CameraComponent_0__CCE3C0B4 (CameraComponent)
+componente CameraComponent_0__CCE3C0B4 (CameraComponent)
+componente CharacterMesh0 (SkeletalMeshComponent)
+componente CollisionCylinder (CapsuleComponent)
+componente Arrow (ArrowComponent)
+componente Passos_GEN_VARIABLE (PassosComponent)
+   sons_passo = ['Passo_Carpete_02', 'Passo_Carpete_03', 'Passo_Carpete_01']
+   distancia_passo = 150.0
+   volume = 0.800000011920929
+   velocidade_minima = 80.0
+   fade_ao_parar = 0.07999999821186066
+componente Corrida_GEN_VARIABLE (CorridaComponent)
+componente Interacao_GEN_VARIABLE (InteracaoComponent)
+componente BalancoCamera_GEN_VARIABLE (BalancoCameraComponent)
+componente CharMoveComp (CharacterMovementComponent)
+Passo_Carpete_01: duracao 0.93 s, looping False
+Passo_Carpete_02: duracao 2.23 s, looping False
+Passo_Carpete_03: duracao 1.76 s, looping False

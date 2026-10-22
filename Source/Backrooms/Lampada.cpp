@@ -45,9 +45,24 @@ ALampada::ALampada()
     Zumbido->bAutoActivate = false;
 }
 
+void ALampada::OnConstruction(const FTransform& Transform)
+{
+    Super::OnConstruction(Transform);
+
+    // Mostra no editor como a lampada vai ficar no jogo
+    DefinirAcesa(!bQueimada);
+}
+
 void ALampada::BeginPlay()
 {
     Super::BeginPlay();
+
+    // Queimada: fica apagada, sem zumbido e sem piscar
+    if (bQueimada)
+    {
+        DefinirAcesa(false);
+        return;
+    }
 
     // Liga o zumbido
     if (SomZumbido)
@@ -57,7 +72,7 @@ void ALampada::BeginPlay()
         {
             Zumbido->AttenuationSettings = Atenuacao;
         }
-        Zumbido->SetVolumeMultiplier(VolumeZumbido);
+        Zumbido->SetVolumeMultiplier(bSemZumbido ? 0.001f : VolumeZumbido);
 
         // Começa num ponto aleatório do áudio, para várias lâmpadas não zumbirem em sincronia
         const float Duracao = SomZumbido->GetDuration();
@@ -66,11 +81,15 @@ void ALampada::BeginPlay()
 
     DefinirAcesa(true);
 
-    GetWorldTimerManager().SetTimer(TimerChecagem, this, &ALampada::Checar, IntervaloChecagem, true);
+    if (ChanceDeRajada > 0.f)
+    {
+        GetWorldTimerManager().SetTimer(TimerChecagem, this, &ALampada::Checar, IntervaloChecagem, true);
+    }
 }
 
 void ALampada::Checar()
 {
+    if (bForcadaApagada || bApagaoGeral) return;
     if (PiscadasRestantes > 0) return;
     if (FMath::FRand() >= ChanceDeRajada) return;
 
@@ -103,16 +122,21 @@ void ALampada::Acender()
 void ALampada::DefinirAcesa(bool bAcesa)
 {
     Luz->SetIntensity(bAcesa ? IntensidadeAcesa : 0.f);
+    bAcesaAgora = bAcesa;
+    Luz->SetVisibility(bAcesa && !bSemLuzReal);   // apagada = nao conta para luz nem sombra (evita o aviso do VSM)
 
     if (UMaterialInterface* Material = bAcesa ? MaterialAceso : MaterialApagado)
     {
-        Placa->SetMaterial(0, Material);
+        for (const int32 Slot : SlotsLuz)
+        {
+            Placa->SetMaterial(Slot, Material);
+        }
     }
 
     // O zumbido "corta" quando a luz apaga (volume quase zero, sem parar o som)
     if (Zumbido && Zumbido->IsPlaying())
     {
-        Zumbido->SetVolumeMultiplier(bAcesa ? VolumeZumbido : 0.001f);
+        Zumbido->SetVolumeMultiplier((bAcesa && !bZumbidoMudo && !bSemZumbido && !bApagaoGeral) ? VolumeZumbido : 0.001f);
     }
 }
 
@@ -127,4 +151,66 @@ void ALampada::TocarEstalo(const TArray<TObjectPtr<USoundBase>>& Lista)
     const float Pitch = FMath::FRandRange(VariacaoPitch.X, VariacaoPitch.Y);
 
     UGameplayStatics::PlaySoundAtLocation(this, Som, Placa->GetComponentLocation(), Volume, Pitch, 0.f, Atenuacao);
+}
+
+void ALampada::ForcarApagado(bool bApagar, bool bComEstalo)
+{
+    if (bQueimada) return;
+
+    // Durante o apagao geral so guarda o pedido (ex.: um susto que estava terminando)
+    if (bApagaoGeral)
+    {
+        bForcadaApagada = bApagar;
+        return;
+    }
+
+    GetWorldTimerManager().ClearTimer(TimerRajada);
+    PiscadasRestantes = 0;
+    bForcadaApagada = bApagar;
+
+    if (bComEstalo)
+    {
+        TocarEstalo(bApagar ? SonsApagar : SonsAcender);
+    }
+    DefinirAcesa(!bApagar);
+}
+
+void ALampada::DefinirZumbidoMudo(bool bMudo)
+{
+    bZumbidoMudo = bMudo;
+    AtualizarVolumeZumbido();
+}
+
+void ALampada::DefinirSemZumbido(bool bNovo)
+{
+    bSemZumbido = bNovo;
+    AtualizarVolumeZumbido();
+}
+
+void ALampada::AtualizarVolumeZumbido()
+{
+    if (Zumbido && Zumbido->IsPlaying())
+    {
+        Zumbido->SetVolumeMultiplier((bAcesaAgora && !bZumbidoMudo && !bSemZumbido && !bApagaoGeral) ? VolumeZumbido : 0.001f);
+    }
+}
+
+void ALampada::DefinirApagaoGeral(bool bAtivo)
+{
+    if (bQueimada) return;
+
+    bApagaoGeral = bAtivo;
+    GetWorldTimerManager().ClearTimer(TimerRajada);
+    PiscadasRestantes = 0;
+
+    if (bAtivo)
+    {
+        bForcadaApagada = false;
+        DefinirAcesa(false);
+    }
+    else
+    {
+        DefinirAcesa(!bForcadaApagada);
+    }
+    AtualizarVolumeZumbido();
 }

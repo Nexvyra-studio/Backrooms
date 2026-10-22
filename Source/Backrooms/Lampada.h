@@ -19,6 +19,42 @@ class BACKROOMS_API ALampada : public AActor
 public:
     ALampada();
 
+    virtual void OnConstruction(const FTransform& Transform) override;
+
+    // Queimada = luminaria apagada para sempre (sem luz e sem zumbido)
+    UPROPERTY(EditAnywhere, Category = "Lampada|Estado")
+    bool bQueimada = false;
+
+    // Usado pelo gerador antes de terminar de criar a lampada
+    void ConfigurarEstado(bool bNovaQueimada, float NovaChanceDeRajada, bool bNovaSemLuzReal = false)
+    {
+        bQueimada = bNovaQueimada;
+        ChanceDeRajada = NovaChanceDeRajada;
+        bSemLuzReal = bNovaSemLuzReal;
+    }
+
+    // Sem luz real = so o painel brilha (economiza desempenho em mapas com muitas lampadas)
+    UPROPERTY(EditAnywhere, Category = "Lampada|Estado")
+    bool bSemLuzReal = false;
+
+    // ---------- Usado pelo diretor de sustos ----------
+    // Apaga/acende "a forca" (ignora o piscar normal ate ser liberada)
+    UFUNCTION(BlueprintCallable, Category = "Lampada")
+    void ForcarApagado(bool bApagar, bool bComEstalo = true);
+
+    // Apagao geral do enigma: apaga tudo e NADA religa a lampada ate liberar
+    UFUNCTION(BlueprintCallable, Category = "Lampada")
+    void DefinirApagaoGeral(bool bAtivo);
+
+    // Corta o zumbido sem apagar a luz (silencio total)
+    UFUNCTION(BlueprintCallable, Category = "Lampada")
+    void DefinirZumbidoMudo(bool bMudo);
+
+    bool EstaQueimada() const { return bQueimada; }
+
+    // Lampada que nunca zumbe (pista: embaixo dela fica um quadro de luz)
+    void DefinirSemZumbido(bool bNovo);
+
 protected:
     virtual void BeginPlay() override;
 
@@ -38,6 +74,11 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Lampada|Materiais")
     TObjectPtr<UMaterialInterface> MaterialApagado;
+
+
+    // Quais slots da malha recebem o material aceso/apagado (os tubos)
+    UPROPERTY(EditAnywhere, Category = "Lampada|Materiais")
+    TArray<int32> SlotsLuz = { 0 };
 
     // ---------- Luz ----------
     UPROPERTY(EditAnywhere, Category = "Lampada|Luz")
@@ -102,4 +143,10 @@ private:
     FTimerHandle TimerChecagem;
     FTimerHandle TimerRajada;
     int32 PiscadasRestantes = 0;
+    bool bForcadaApagada = false;
+    bool bZumbidoMudo = false;
+    bool bSemZumbido = false;
+    bool bApagaoGeral = false;
+    void AtualizarVolumeZumbido();
+    bool bAcesaAgora = true;
 };

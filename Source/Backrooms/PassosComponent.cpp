@@ -4,12 +4,12 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
-#include "TimerManager.h"
-#include "Components/AudioComponent.h"
 
 UPassosComponent::UPassosComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	// Roda todo quadro: o passo cai exatamente quando o pe "toca" o chao (antes era a cada 0,05 s)
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickGroup = TG_PostPhysics;
 }
 
 void UPassosComponent::BeginPlay()
@@ -20,61 +20,58 @@ void UPassosComponent::BeginPlay()
 	{
 		UltimaPosicao = Dono->GetActorLocation();
 	}
-
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerChecagem, this, &UPassosComponent::Checar, IntervaloChecagem, true);
+	// Comeca no meio de uma passada: o primeiro passo vem logo que comecar a andar
+	Fase = 0.55f;
 }
 
-void UPassosComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UPassosComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	GetWorld()->GetTimerManager().ClearTimer(TimerChecagem);
-	Super::EndPlay(EndPlayReason);
-}
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-void UPassosComponent::Checar()
-{
 	ACharacter* Personagem = Cast<ACharacter>(GetOwner());
 	if (!Personagem) return;
 
 	const FVector Posicao = Personagem->GetActorLocation();
-	UCharacterMovementComponent* Movimento = Personagem->GetCharacterMovement();
+	FVector Delta = Posicao - UltimaPosicao;
+	Delta.Z = 0.f;
+	UltimaPosicao = Posicao;
+
+	const UCharacterMovementComponent* Movimento = Personagem->GetCharacterMovement();
+	const bool bNoChao = Movimento && Movimento->IsMovingOnGround();
 	const float Velocidade = Personagem->GetVelocity().Size2D();
 
-	if (Movimento && Movimento->IsMovingOnGround() && Velocidade < VelocidadeMinima)
+	// Pousou de um pulo/queda: um passo mais forte na hora
+	if (bEstavaNoAr && bNoChao)
 	{
-		// Parado ou quase parado: zera para o proximo passo comecar do zero
-		DistanciaAcumulada = 0.f;
-
-		// Corta o passo que ainda esta tocando
-		if (SomAtual && SomAtual->IsPlaying())
-		{
-			SomAtual->FadeOut(FadeAoParar, 0.f);
-		}
-		SomAtual = nullptr;
+		TocarPasso(1.3f);
+		Fase = FMath::FloorToFloat(Fase) + 1.f;
 	}
-	else if (Movimento && Movimento->IsMovingOnGround())
-	{
-		FVector Delta = Posicao - UltimaPosicao;
-		Delta.Z = 0.f; // ignora subida/descida
+	bEstavaNoAr = Movimento && Movimento->IsFalling();
 
-		DistanciaAcumulada += Delta.Size();
+	if (!bNoChao || Velocidade < VelocidadeMinima) return;
 
-		if (DistanciaAcumulada >= DistanciaPasso)
-		{
-			DistanciaAcumulada = 0.f;
-			TocarPasso();
-		}
-	}
-	else
+	// Teleporte / correcao grande da rede: ignora
+	const float Andou = Delta.Size();
+	if (Andou > 200.f) return;
+
+	// Passada mais longa quanto mais rapido
+	const float Correndo = FMath::Clamp((Velocidade - 250.f) / FMath::Max(1.f, VelocidadeCorrida - 250.f), 0.f, 1.f);
+	const float Passada = FMath::Lerp(DistanciaPasso, DistanciaPassoCorrendo, Correndo);
+
+	const float Antes = Fase;
+	Fase += Andou / Passada;
+
+	// Cruzou um numero inteiro = pe no chao
+	if (FMath::FloorToFloat(Fase) > FMath::FloorToFloat(Antes))
 	{
-		// No ar: ao pousar, o primeiro passo vem mais rapido
-		DistanciaAcumulada = DistanciaPasso * 0.5f;
+		TocarPasso(FMath::Lerp(1.f, VolumeCorrendo, Correndo));
 	}
 
-	UltimaPosicao = Posicao;
+	// Mantem o numero pequeno (precisao) sem perder a paridade esquerda/direita
+	if (Fase > 1000.f) Fase -= 1000.f;
 }
 
-void UPassosComponent::TocarPasso()
+void UPassosComponent::TocarPasso(float MultiplicadorVolume)
 {
 	if (SonsPasso.Num() == 0) return;
 
@@ -92,14 +89,14 @@ void UPassosComponent::TocarPasso()
 
 	// Toca na altura dos pes
 	FVector Pe = Personagem->GetActorLocation();
-	if (UCapsuleComponent* Capsula = Personagem->GetCapsuleComponent())
+	if (const UCapsuleComponent* Capsula = Personagem->GetCapsuleComponent())
 	{
 		Pe.Z -= Capsula->GetScaledCapsuleHalfHeight();
 	}
 
-	SomAtual = UGameplayStatics::SpawnSoundAtLocation(
-		this, Som, Pe, FRotator::ZeroRotator,
-		Volume * FMath::FRandRange(VariacaoVolume.X, VariacaoVolume.Y),
+	UGameplayStatics::PlaySoundAtLocation(
+		this, Som, Pe,
+		Volume * MultiplicadorVolume * FMath::FRandRange(VariacaoVolume.X, VariacaoVolume.Y),
 		FMath::FRandRange(VariacaoPitch.X, VariacaoPitch.Y),
 		0.f, Atenuacao);
 }

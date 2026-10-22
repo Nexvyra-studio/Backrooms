@@ -3,11 +3,12 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "PassosComponent.generated.h"
-class UAudioComponent;
 
 class USoundBase;
 class USoundAttenuation;
 
+// Som dos passos do personagem: UM passo a cada X cm andados, no ritmo exato do movimento.
+// A camera (BalancoCameraComponent) usa a mesma "fase" para balancar junto com o som.
 UCLASS(ClassGroup = (Backrooms), meta = (BlueprintSpawnableComponent))
 class BACKROOMS_API UPassosComponent : public UActorComponent
 {
@@ -16,49 +17,54 @@ class BACKROOMS_API UPassosComponent : public UActorComponent
 public:
 	UPassosComponent();
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	UPROPERTY(EditAnywhere, Category = "Passos")
 	TArray<TObjectPtr<USoundBase>> SonsPasso;
 
 	UPROPERTY(EditAnywhere, Category = "Passos")
 	TObjectPtr<USoundAttenuation> Atenuacao;
 
-	// Distancia percorrida (cm) entre um passo e outro
+	// Distancia (cm) entre um passo e outro andando
 	UPROPERTY(EditAnywhere, Category = "Passos", meta = (ClampMin = "10"))
 	float DistanciaPasso = 150.f;
 
-	// Abaixo dessa velocidade (cm/s) nao toca passos
+	// Distancia (cm) entre passos correndo (a passada fica mais longa)
+	UPROPERTY(EditAnywhere, Category = "Passos", meta = (ClampMin = "10"))
+	float DistanciaPassoCorrendo = 195.f;
+
+	// Velocidade (cm/s) considerada "correndo" para a passada longa
 	UPROPERTY(EditAnywhere, Category = "Passos")
-	float VelocidadeMinima = 80.f;
+	float VelocidadeCorrida = 500.f;
+
+	// Abaixo dessa velocidade (cm/s) nao conta como andando
+	UPROPERTY(EditAnywhere, Category = "Passos")
+	float VelocidadeMinima = 60.f;
 
 	UPROPERTY(EditAnywhere, Category = "Passos")
-	float Volume = 0.5f;
+	float Volume = 0.42f;
+
+	// Correndo o passo e mais forte
+	UPROPERTY(EditAnywhere, Category = "Passos")
+	float VolumeCorrendo = 1.35f;
 
 	UPROPERTY(EditAnywhere, Category = "Passos")
-	FVector2D VariacaoPitch = FVector2D(0.92f, 1.08f);
+	FVector2D VariacaoPitch = FVector2D(0.94f, 1.06f);
 
 	UPROPERTY(EditAnywhere, Category = "Passos")
-	FVector2D VariacaoVolume = FVector2D(0.8f, 1.0f);
+	FVector2D VariacaoVolume = FVector2D(0.85f, 1.0f);
 
-	UPROPERTY(EditAnywhere, Category = "Passos")
-	float IntervaloChecagem = 0.05f;
-
-	// Tempo (s) do fade que corta o passo quando o personagem para
-	UPROPERTY(EditAnywhere, Category = "Passos")
-	float FadeAoParar = 0.08f;
+	// Fase continua dos passos: a parte inteira conta os passos, a fracao vai de 0 (pe no chao) ate 1 (proximo passo)
+	float GetFase() const { return Fase; }
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	void Checar();
-	void TocarPasso();
+	void TocarPasso(float MultiplicadorVolume);
 
-	FTimerHandle TimerChecagem;
 	FVector UltimaPosicao = FVector::ZeroVector;
-	float DistanciaAcumulada = 0.f;
+	float Fase = 0.f;
 	int32 UltimoIndice = INDEX_NONE;
-
-	UPROPERTY()
-	TObjectPtr<UAudioComponent> SomAtual;
+	bool bEstavaNoAr = false;
 };

@@ -1,0 +1,13 @@
+sons importados: Ambiente_Sala, Vento_Fresta, Batidas_Parede, Intro_Queda
+ATT_Lampada: raio interno 200, queda 1200
+BalancoCamera adicionado ao personagem
+pos-processamento ajustado em PostProcessVolume
+mapa gerado
+no mapa: {'PostProcessVolume': 1, 'DiretorSustos': 1, 'LampadaPainel': 596, 'QuadroLuz': 6, 'ParedeSaida': 1, 'Bilhete': 6, 'EnigmaLevel0': 1, 'AmbienteLevel0': 1}
+DiretorSustos.intervalo_entre = <Struct 'Vector2D' (0x00000225AD257070) {x: 60.000000, y: 110.000000}>
+DiretorSustos.intervalo_minimo = 45.0
+DiretorSustos.atraso_apos_primeiro_passo = 90.0
+DiretorSustos.volume_passos = 2.200000047683716
+DiretorSustos.peso_batidas = 2.0
+mapa aberto: /Game/Maps/Lvl_Level0.Lvl_Level0
+PRONTO
